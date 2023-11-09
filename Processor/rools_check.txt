@@ -1,0 +1,13 @@
+20
+push stk 2003
+push var 1
+push stk 300
+push stk 3
+pop comment 1
+jump stk 0
+comment
+mul
+out
+HLT
+comment
+comment

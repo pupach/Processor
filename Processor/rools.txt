@@ -1,0 +1,11 @@
+20
+push stk 2003
+labels may
+push var1
+push stk 300
+push stk 3
+pop var1
+jump may
+mul
+out
+HLT	
