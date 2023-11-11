@@ -1,15 +1,16 @@
 #ifndef OUT_FUNC
 #ifndef DOUBLE_DEF
-static const int arr_1[2][2] =  {{var, 29}, {stk, 28}};
+static const int arr_1[2][2] =  {{var, 29}, {stk, 28}}; //сделать один defaine def_com_with_arghs
 
-static const int arr_3[2][2] =  {};
+static const int arr_3[2][2] =  {{jmp_b, 29}, {jmp_m, 28}, {jmp_br, 27}, {jmp_mr, 26}};
 
 static const int arr_2[2][2] =  {{var, 29}};
 #endif
 
 DEF_COM_WITH_ARGS(push, 31, 2, arr_1)
 
-DEF_COM_WITH_ARGS(pop, 89, 2, arr_2)
+DEF_COM_WITH_ARGS(pop, 89, 1, arr_2) //ИСПРАВИТЬ ЧТО ДЛИННУ МАССИВА НУЖН ПЕРЕДАВАТЬ ОТДЕЛЬНО
+
 
 DEF_COM_WITH_ARGS(jump, 76, 0, arr_3)
 
@@ -23,7 +24,7 @@ DEF_COM_WITH_ARGS(labels, 29, int code_str = ass->command_assembling;
                             int numb_labels = ass->list_labels->size_arr;
                             strcpy(((label *)(ass->list_labels->arr))[numb_labels].name, ass->last_var_str_com);
                             ((label *)ass->list_labels->arr)[numb_labels].numb_str_code = code_str;
-                            LOG(1, stderr, "code VA_ARG labels, %d, %d  name label %s", code_str, numb_labels, ((label *)ass->list_labels->arr)[numb_labels].name);
+                            LOG(1, stderr, "\ncode VA_ARG labels, %d, %d  name label %s\n", code_str, numb_labels, ((label *)ass->list_labels->arr)[numb_labels].name);
                             ass->list_labels->size_arr += 1;
                             return nullptr;)
 
@@ -60,10 +61,19 @@ DEF_COM(out, 11)
 
 DEF_COM(var, 9)
 
+DEF_COM(jmp_b, 90)
+
+DEF_COM(jmp_br, 91)
+
+DEF_COM(jmp_mr, 92)
+
+DEF_COM(jmp_m, 93)
+
 DEF_COM(stk, 78)
 
 DEF_COM(POISON_VAL, -100001)
 
-DEF_COM(comment, 0)
+DEF_COM(comment, 886)
 
 #endif
+

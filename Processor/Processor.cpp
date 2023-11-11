@@ -80,7 +80,8 @@ len_arr *fill_dep_com(len_arr *arr_com_ass)
         {\
             depend_com##comm[i].bit_com = (1 << arr_dep_com[i][1]);\
             depend_com##comm[i].ptr_this_com = find_com_in_arr_com(arr_com_ass, arr_dep_com[i][0]);\
-            LOG(1, stderr, "for end %d "#comm" find_com_in_arr_com %s\n numb_byte %d \n", i, find_com_in_arr_com(arr_com_ass, arr_dep_com[i][0])->str_code, arr_dep_com[i][1]);\
+            LOG(1, stderr, "for end %d "#comm" find_com_in_arr_com %s\n numb_byte %d \n", i, \
+                    find_com_in_arr_com(arr_com_ass, arr_dep_com[i][0])->str_code, arr_dep_com[i][1]);\
         }\
         cur_com##comm->depend_com = gen_struct_len_arr(depend_com##comm, am_dep_com);\
         for(int i = 0; i < am_dep_com; i++)\

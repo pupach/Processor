@@ -1,7 +1,7 @@
 #ifndef PROCESSOR
 #define PROCESSOR
 #include "command.h"
-#include "../Stack/stack.h"
+#include "../Stack/source/stack.h"
 #include "../str_project/onegin.h"
 #include <stdlib.h>
 #include <stdio.h>

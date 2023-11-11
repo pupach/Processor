@@ -1,7 +1,7 @@
 #ifndef DIS_ASSEMBLER
 #define DIS_ASSEMBLER
 #include "command.h"
-#include "../Stack/stack.h"
+#include "../Stack/source/stack.h"
 #include "../str_project/onegin.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,10 +26,13 @@ static bool check_version(int file_version);
 
 static len_arr *read_bin_file(FILE *stream_read);
 
+Dis_assembler *init_dis_assembler(len_arr *ptr_on_code, size_t numb_label);
 
 len_arr *compile_one_str_dis(Dis_assembler *dis_ass);
 
-CODE_ERRORS compiling_dis_assembler(FILE *stream_read, FILE *stream_write);
+CODE_ERRORS free_mem_dis_ass(Dis_assembler * dis_ass);
+
+CODE_ERRORS compiling_dis_assembler(Dis_assembler *dis_ass, FILE *stream_write);
 
 CODE_ERRORS dis_assembling(char file_to_read[], char file_to_write[]);
 #endif

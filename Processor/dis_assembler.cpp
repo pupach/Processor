@@ -48,6 +48,7 @@ static len_arr *com_##command(Dis_assembler *dis_ass)\
         res_size = asprintf(&ptr_inter_str, "stk");\
     }\
     res_size = asprintf(&ptr_res_str, "%s %s %d\n", cur_com->str_code, ptr_inter_str, *(com_for_dis_ass+1));\
+    free(ptr_inter_str);\
     __VA_ARGS__;\
     return gen_struct_len_arr(ptr_res_str, res_size);\
 }
@@ -62,9 +63,18 @@ CODE_ERRORS dis_assembling(char file_to_read[], char file_to_write[])
     FILE *stream_read = open_file(file_to_read, "r");
     FILE *stream_write = open_file(file_to_write, "wb");
 
-    compiling_dis_assembler(stream_read, stream_write);
+    len_arr *prt_all_command = read_bin_file(stream_read);
+
+    printf_len_arr_in_LOG_int(prt_all_command, stderr);
+
+    Dis_assembler *dis_ass = init_dis_assembler(prt_all_command, 10);
+
+    compiling_dis_assembler(dis_ass, stream_write);
 
     fclose(stream_write);
+
+    free_all_dinamic_ptr(prt_all_command);
+    HADLER_EROR(free_mem_dis_ass(dis_ass));
 }
 
 Dis_assembler *init_dis_assembler(len_arr *ptr_on_code, size_t numb_label)
@@ -113,17 +123,29 @@ static len_arr *read_bin_file(FILE *stream_read)
 }
 
 
-CODE_ERRORS compiling_dis_assembler(FILE *stream_read, FILE *stream_write)
+CODE_ERRORS free_mem_dis_ass(Dis_assembler * dis_ass)
 {
-    len_arr *prt_all_command = read_bin_file(stream_read);
+    for(int i = 0; i < dis_ass->arr_com_ass->size_arr; i++)
+    {
+        if(((COMMAND_ASSEMBL *)dis_ass->arr_com_ass->arr)[i].depend_com != nullptr)
+        {
+            free(((COMMAND_ASSEMBL *)dis_ass->arr_com_ass->arr)[i].depend_com->arr);
+        }
+        free(((COMMAND_ASSEMBL *)dis_ass->arr_com_ass->arr)[i].depend_com);
+    }
+    free(dis_ass->arr_com_ass->arr);
+    free(dis_ass->arr_com_ass);
+    free(dis_ass->list_labels->arr);
+    free(dis_ass->list_labels);
+    free(dis_ass);
+}
 
-    printf_len_arr_in_LOG_int(prt_all_command, stderr);
 
-    char *arr_to_write_bin = (char *)calloc((prt_all_command->size_arr * 15) + 5, sizeof(char));// спросить как делать лучше дефайн для печати тк может быть лен_арр или инт
+CODE_ERRORS compiling_dis_assembler(Dis_assembler *dis_ass, FILE *stream_write)
+{
+    char *arr_to_write_bin = (char *)calloc((dis_ass->ptr_on_code->size_arr * 15) + 5, sizeof(char));// спросить как делать лучше дефайн для печати тк может быть лен_арр или инт
     len_arr *bin_len_arr = gen_struct_len_arr(arr_to_write_bin, 0);//исправить числа
     len_arr *for_ret_str = nullptr;
-
-    Dis_assembler *dis_ass = init_dis_assembler(prt_all_command, 10);
 
     char VERSION_DIS_ASSEMBLER_STR[4] = {};
 
@@ -142,7 +164,7 @@ CODE_ERRORS compiling_dis_assembler(FILE *stream_read, FILE *stream_write)
             len_arr_merge_char(bin_len_arr, for_ret_str);
             printf_len_arr_in_LOG_char(for_ret_str, stderr);
             free(for_ret_str->arr);
-            free(for_ret_str);
+            free(for_r  et_str);
         }
         dis_ass->command_assembling++;
     }
@@ -151,7 +173,6 @@ CODE_ERRORS compiling_dis_assembler(FILE *stream_read, FILE *stream_write)
     printf_len_arr_in_LOG_char(bin_len_arr, stderr);
     fprintf(stream_write, "%s", (char *)bin_len_arr->arr);
 
-    free_all_dinamic_ptr(prt_all_command);
     free(bin_len_arr);
     free(arr_to_write_bin);
 }
@@ -192,7 +213,7 @@ len_arr *compile_one_str_dis(Dis_assembler *dis_ass)
         #undef DEF_COM_WITH_ARGS
         #undef DEF_COM
         default:
-            LOG(1, stderr, "very strange error");
+            LOG(1, stderr, "very strange error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11\n ");
             return nullptr;
 
     };

@@ -6,7 +6,7 @@ CFLAGS = -c -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-
 LFLAGS = -fsanitize=address
 DIR_O = ./object
 DIR_SOUR = .
-DIR_STACK = ../Stack
+DIR_STACK = ../Stack/source
 DIR_ONEGIN_SOUR= ../str_project/source
 DIR_ONEGIN_O = ../str_project/object
 DIR_LIB = ../my_lib

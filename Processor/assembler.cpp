@@ -18,6 +18,8 @@ static int find_label_by_name(Assembler *ass, char *name);
 
 static const char *NUMB_COM[512] = {};
 
+#define OUT_FUNC
+
 #define DEF_COM(command, numb, ...)  \
 static len_arr *com_##command()\
 {\
@@ -80,6 +82,7 @@ Assembler *init_assembler(len_arr *ptr_on_code, size_t numb_label)
     }
     return ass;
 }
+
 //переписатьlen_arr чтобы вместо gen_struct_len_arr вызывать len_arr_merge чтобы не было calloc
 CODE_ERRORS assembling(char file_to_read[], char file_to_write[])
 {
@@ -93,13 +96,16 @@ CODE_ERRORS assembling(char file_to_read[], char file_to_write[])
     len_arr *buff = nullptr;
     len_arr *ptr_all_str = split_file_on_str(stream_read, &buff);
     Assembler *ass = init_assembler(ptr_all_str);
+    LOG(1, stderr, "assembling list label size  %d\n", ass->list_labels->size_arr);
 
-    find_all_labels(ass);
-    compiling_assembler(ass, stream_write);
+    HADLER_EROR(find_all_labels(ass));
+
+    HADLER_EROR(compiling_assembler(ass, stream_write));
 
     fclose(stream_write);
     free_all_dinamic_ptr(ptr_all_str);
     free_mem_buf(buff);
+    HADLER_EROR(free_mem_ass(ass));
 }
 
 bool check_version(int file_version)
@@ -108,50 +114,36 @@ bool check_version(int file_version)
     return false;
 }
 
-#define DEF_COM_WITH_ARGS(com_gen, numb, ...)    \
-    if(strcmp(#com_gen, command) == 0)                          \
-        {\
-            char command_what_push[MAX_SIZE_COM] = {};\
-            size_t size = strcpy_to_letter(command_what_push, (char *)ptr_str->arr);\
-            ptr_str->arr += size;\
-            int var_to = atoi((char *)ptr_str->arr);\
-            ass->last_var_int_com = var_to;\
-            ass->last_var_str_com = command_what_push;\
-            return com_##com_gen(ass);  \
-        }\
-    else
-#define DEF_COM(com_gen, numb,...)\
-    if(strcmp(#com_gen, command) == 0)   \
-        {\
-            return com_##com_gen();  \
-        }\
-    else
-
 CODE_ERRORS find_all_labels(Assembler *ass)
 {
     Assembler *ass_only_fol_label = init_assembler(ass->ptr_on_code);
-    compiling_assembler(ass_only_fol_label, nullptr);
+    if(ass_only_fol_label == nullptr)      return PTR_ASSEMBLER_NULL;
 
-    label *new_list_labels = (label *)calloc(sizeof(label), 10);
-    memcpy(new_list_labels, (label *)(ass_only_fol_label->list_labels->arr), sizeof(label) * 1);//10 = numb_labels
+    HADLER_EROR(compiling_assembler(ass_only_fol_label, nullptr));
+    if(ass_only_fol_label->list_labels == nullptr)     {return PTR_LIST_LABELS_NULL;}
+    LOG(1, stderr, "\n ass_only_fol_label->list_labels %p\n", ass_only_fol_label->list_labels);
+    len_arr a = *(ass_only_fol_label->list_labels);
+    if(ass_only_fol_label->list_labels->arr == nullptr){return PTR_ARR_NULL;}
+
+    LOG(1, stderr, "find_all_labels, size_list_labels %d\n", ass_only_fol_label->list_labels->size_arr);
+
+    memcpy(ass->list_labels->arr, (label *)(ass_only_fol_label->list_labels->arr), sizeof(label) * 1);//10 = numb_labels
     ass->list_labels->size_arr = ass_only_fol_label->list_labels->size_arr;
-    ass->list_labels->arr = new_list_labels;
 
-    free_mem_ass(ass_only_fol_label);
+    HADLER_EROR(free_mem_ass(ass_only_fol_label));
 }
 
 
 CODE_ERRORS compiling_assembler(Assembler *ass, FILE *stream_write)
 {
-    //printf_len_arr_in_LOG_char(ptr_all_str, stderr);
-
     int *arr_to_write_bin = (int *)calloc((ass->ptr_on_code->size_arr * 3) + 2, sizeof(int));// спросить как делать лучше дефайн для печати тк может быть лен_арр или инт
     len_arr *bin_len_arr = gen_struct_len_arr(arr_to_write_bin, 0);
     ((int *)bin_len_arr->arr)[0] = VERSION_PROGRAMM ;
     bin_len_arr->size_arr = 2;
 
     len_arr *for_ret_str = nullptr;
-
+    do
+    {
         for_ret_str = compile_one_str_ass(ass);
         if (for_ret_str != nullptr)
         {
@@ -160,17 +152,17 @@ CODE_ERRORS compiling_assembler(Assembler *ass, FILE *stream_write)
             free(for_ret_str);
         }
         ass->str_assembl++;
-    }
+    }while(ass->str_assembl < ass->ptr_on_code->size_arr);
+
     if(stream_write != nullptr)
     {
-        write_bin_file(bin_len_arr, stream_write);
+        HADLER_EROR(write_bin_file(bin_len_arr, stream_write));
     }
 
     printf_len_arr_in_LOG_int(bin_len_arr, stderr);
 
     free(bin_len_arr->arr);
     free(bin_len_arr);
-    free_mem_ass(ass);
 }
 
 CODE_ERRORS free_mem_ass(Assembler * ass)
@@ -199,9 +191,27 @@ len_arr *compile_one_str_ass(Assembler *ass)
 
     LOG(1, stderr, "str in %s\n", command);
 
-    ptr_str->arr = ((char *)ptr_str->arr + size_1);
+    char *ptr_str_arr = ((char *)ptr_str->arr + size_1);
 
-    // Parses expressions like: push var %d / push %d
+    #define DEF_COM_WITH_ARGS(com_gen, numb, ...)    \
+    if(strcmp(#com_gen, command) == 0)                          \
+        {\
+            char command_what_push[MAX_SIZE_COM] = {};\
+            size_t size = strcpy_to_letter(command_what_push, (char *)ptr_str_arr);\
+            ptr_str_arr += size;\
+            int var_to = atoi((char *)(ptr_str_arr));\
+            ass->last_var_int_com = var_to;\
+            ass->last_var_str_com = command_what_push;\
+            return com_##com_gen(ass);  \
+        }\
+    else
+
+    #define DEF_COM(com_gen, numb,...)\
+        if(strcmp(#com_gen, command) == 0)   \
+            {\
+                return com_##com_gen();  \
+            }\
+        else
 
     #include"DSL.h"
     // else
@@ -209,10 +219,10 @@ len_arr *compile_one_str_ass(Assembler *ass)
             return nullptr;
             LOG(1, stderr, "very strange error or maybe label");
         }
-}
+    #undef DEF_COM_WITH_ARGS
+    #undef DEF_COM
 
-#undef DEF_COM_WITH_ARGS
-#undef DEF_COM
+}
 
 CODE_ERRORS write_bin_file(len_arr *arr_to_write_bin, FILE *stream_write)
 {

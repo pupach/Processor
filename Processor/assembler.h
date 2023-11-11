@@ -2,7 +2,7 @@
 #define ASSEMBLER
 #include "command.h"
 #include "Processor.h"
-#include "../Stack/stack.h"
+#include "../Stack/source/stack.h"
 #include "../str_project/onegin.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,6 +15,8 @@ static bool check_version(int file_version);
 static const size_t MAX_SIZE_COM = 10;
 
 static const size_t MAX_AMOUNT_DEPEND_COM = 10;
+
+static const size_t MAX_ANOUNT_ARGUMENTS = 10;
 
 struct Assembler
 {

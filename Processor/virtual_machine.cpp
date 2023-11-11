@@ -94,15 +94,14 @@ CODE_ERRORS run_program_from_file(FILE *stream_read)
 
     Stack_Destructor(Cpu->stk);
     free_all_dinamic_ptr(prt_all_command);
-    free(Cpu);
+    HADLER_EROR(free_mem_cpu(Cpu));
 }
 
 Processor *init_processor(len_arr *ptr_on_com)
 {
     Processor *Cpu = (Processor *)calloc(sizeof(Processor), 1);
 
-    Stack stk1 = {};
-    Stack *stk2 = &stk1;
+    Stack *stk2 = (Stack *)calloc(sizeof(Stack), 1);
     Stack_init(stk2, 20, 2);
 
     Cpu->stk = stk2;
@@ -113,6 +112,23 @@ Processor *init_processor(len_arr *ptr_on_com)
     return Cpu;
 
 }
+
+
+CODE_ERRORS free_mem_cpu(Processor *cpu)
+{
+    for(int i = 0; i < cpu->arr_com_ass->size_arr; i++)
+    {
+        if(((COMMAND_ASSEMBL *)cpu->arr_com_ass->arr)[i].depend_com != nullptr)
+        {
+            free(((COMMAND_ASSEMBL *)cpu->arr_com_ass->arr)[i].depend_com->arr);
+        }
+        free(((COMMAND_ASSEMBL *)cpu->arr_com_ass->arr)[i].depend_com);
+    }
+    free(cpu->arr_com_ass->arr);
+    free(cpu->arr_com_ass);
+    free(cpu);
+}
+
 
 CODE_ERRORS execute_all_command(Processor *Cpu)
 {
@@ -144,7 +160,7 @@ CODE_ERRORS execute_all_command(Processor *Cpu)
         #define DEF_COM(com_gen, numb,...)\
             case numb:\
             {\
-                com_##com_gen(Cpu);\
+                HADLER_EROR(com_##com_gen(Cpu));\
                 break;\
             };
 
@@ -152,7 +168,7 @@ CODE_ERRORS execute_all_command(Processor *Cpu)
             case numb:\
             {\
                 LOG(1, stderr, "comand to machining, %d\n", command);\
-                com_##com_gen(Cpu, com_gen##_com);\
+                HADLER_EROR(com_##com_gen(Cpu, com_gen##_com));\
                 break;\
             };
         #include"DSL.h"
@@ -180,8 +196,11 @@ bool check_version(int file_version)
 static CODE_ERRORS com_push(Processor *cpu, COMMAND_ASSEMBL *push_com)
 {
     int *ptr_com = (((int *)cpu->ptr_on_com->arr));
-    int command = ptr_com[cpu->numb_com_processing + 1];
-    int numb_va = ptr_com[cpu->numb_com_processing + 2];
+    int command = ptr_com[cpu->numb_com_processing];
+    int numb_va = ptr_com[cpu->numb_com_processing + 1];
+    cpu->numb_com_processing += 1;
+
+    LOG(1, stderr, "com_push   command %d,  numb_va %d  \n", command, numb_va);
 
     if(command & (((DEP_COM *)push_com->depend_com->arr)[0].bit_com))
     {
@@ -193,14 +212,14 @@ static CODE_ERRORS com_push(Processor *cpu, COMMAND_ASSEMBL *push_com)
 
             LOG(1, stderr, "com_push number to push in var %d, %d val in var %d", numb_va - 1, slag_1, cpu->variables[numb_va - 1]);
 
-            cpu->numb_com_processing += 2;
             return TWO_VAL;
         }
     }
     else if(command & (((DEP_COM *)push_com->depend_com->arr)[1].bit_com))
     {
-        cpu->numb_com_processing += 1;
         Stack_Push(cpu->stk, (Elen_s)numb_va);
+
+        LOG(1, stderr, "push in stack   %d  \n", numb_va);
 
         return ALL_GOOD;
     }
@@ -210,8 +229,8 @@ static CODE_ERRORS com_push(Processor *cpu, COMMAND_ASSEMBL *push_com)
 static CODE_ERRORS com_pop(Processor *cpu, COMMAND_ASSEMBL *pop_com)
 {
     int *ptr_com = (((int *)cpu->ptr_on_com->arr));
-    int command = ptr_com[cpu->numb_com_processing + 1];
-    int numb_va = ptr_com[cpu->numb_com_processing + 2];
+    int command = ptr_com[cpu->numb_com_processing];
+    int numb_va = ptr_com[cpu->numb_com_processing + 1];
 
     if(command & (((DEP_COM *)pop_com->depend_com->arr)[0].bit_com))
     {
@@ -219,7 +238,7 @@ static CODE_ERRORS com_pop(Processor *cpu, COMMAND_ASSEMBL *pop_com)
         {
             Stack_Push(cpu->stk, cpu->variables[numb_va]);
 
-            cpu ->numb_com_processing += 2;
+            cpu ->numb_com_processing += 1;
             return TWO_VAL;
         }
     }
@@ -239,17 +258,17 @@ static CODE_ERRORS com_jump(Processor *cpu, COMMAND_ASSEMBL *jump_com)
 {
 
     int *ptr_com = (((int *)cpu->ptr_on_com->arr));
-    int command = ptr_com[cpu->numb_com_processing + 1];
-    int numb_va = ptr_com[cpu->numb_com_processing + 2];
-
-    if(command & (((DEP_COM *)jump_com->depend_com->arr)[0].bit_com))
+    int command = ptr_com[cpu->numb_com_processing];
+    int numb_va = ptr_com[cpu->numb_com_processing + 1];
+    if(command & (((DEP_COM *)pop_com->depend_com->arr)[0].bit_com))
     {
-        cpu->numb_com_processing = (numb_va - 1);
-        cpu->numb_com_processing += 1;
-
-        return ALL_GOOD;
+        Elen_s elem;
+        Stack_Pop(cpu->stk, &elem);
+        if()
     }
-    return UNDEF_COM;
+    cpu->numb_com_processing = (numb_va - 1);
+
+    return ALL_GOOD;
 }
 
 static CODE_ERRORS com_out(Processor *cpu)
