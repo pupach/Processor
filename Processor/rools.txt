@@ -1,11 +1,11 @@
-20
+21
 push stk 2003
 labels may
-push var1
+push var 1
 push stk 300
 push stk 3
-pop var1
+pop var 1
 jump may
 mul
 out
-HLT	
+HLT

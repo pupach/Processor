@@ -10,6 +10,7 @@ DIR_STACK = ../Stack/source
 DIR_ONEGIN_SOUR= ../str_project/source
 DIR_ONEGIN_O = ../str_project/object
 DIR_LIB = ../my_lib
+DIR_LEN_ARR = ../my_lib/len_arr
 
 
 # 1) use wildcard to get all cpps
@@ -65,7 +66,7 @@ $(DIR_O)/func_sort.o: $(DIR_ONEGIN_SOUR)/func_sort.cpp $(DIR_ONEGIN_SOUR)/func_s
 $(DIR_O)/str_output.o: $(DIR_ONEGIN_SOUR)/str_output.cpp $(DIR_ONEGIN_SOUR)/func_sort.h $(DIR_ONEGIN_SOUR)/str_input.h $(DIR_ONEGIN_SOUR)/str_output.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(DIR_O)/len_array.o: $(DIR_ONEGIN_SOUR)/len_array.cpp $(DIR_ONEGIN_SOUR)/func_sort.h $(DIR_ONEGIN_SOUR)/str_input.h
+$(DIR_O)/len_array.o: $(DIR_LEN_ARR)/len_array.cpp $(DIR_ONEGIN_SOUR)/func_sort.h $(DIR_ONEGIN_SOUR)/str_input.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(DIR_O)/algoritm_sort.o: $(DIR_ONEGIN_SOUR)/algoritm_sort.cpp $(DIR_ONEGIN_SOUR)/func_sort.h $(DIR_ONEGIN_SOUR)/algoritm_sort.h

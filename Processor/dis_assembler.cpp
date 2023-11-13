@@ -1,5 +1,5 @@
 #include "../my_lib/work_with_file.h"
-#include "../str_project/source/len_array.h"
+#include "../my_lib/len_arr/len_array.h"
 #include "../str_project/onegin.h"
 #include "../my_lib/str_func.h"
 #include "command.h"
@@ -9,7 +9,7 @@
 
 static const size_t MAX_SIZE_COM = 10;
 
-static const int VERSION_PROGRAMM = 20;
+static const int VERSION_PROGRAMM = 21;
 
 static bool check_version(int file_version);
 
@@ -164,7 +164,7 @@ CODE_ERRORS compiling_dis_assembler(Dis_assembler *dis_ass, FILE *stream_write)
             len_arr_merge_char(bin_len_arr, for_ret_str);
             printf_len_arr_in_LOG_char(for_ret_str, stderr);
             free(for_ret_str->arr);
-            free(for_r  et_str);
+            free(for_ret_str);
         }
         dis_ass->command_assembling++;
     }

@@ -23,13 +23,15 @@ struct Assembler
     len_arr *list_labels = {};
     len_arr *ptr_on_code = {};
     len_arr *arr_com_ass = {};
+    char **cur_com_args = {};
     int str_assembl = -1;
     int command_assembling = -1;
-    char *last_var_str_com = nullptr;
-    int last_var_int_com = POISON_VAL;
+    char *buff_for;
 };
 
 len_arr *compile_one_str_ass(Assembler *ptr_str);
+
+Assembler *init_assembler(len_arr *ptr_on_code, size_t numb_label=10);
 
 CODE_ERRORS free_mem_ass(Assembler * ass);
 

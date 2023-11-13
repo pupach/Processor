@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern int MAX_SIZE_STR;
+
 const int AMOUNT_VAR_IN_PROC = 4;
 
 static const int MAX_SIZE_LABEL_NAME = 10;

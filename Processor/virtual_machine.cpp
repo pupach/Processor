@@ -1,6 +1,6 @@
 #include "../my_lib/work_with_file.h"
 #include "../str_project/onegin.h"
-#include "../str_project/source/len_array.h"
+#include "../my_lib/len_arr/len_array.h"
 #include "command.h"
 #include "virtual_machine.h"
 #include "Processor.h"
@@ -254,9 +254,11 @@ static CODE_ERRORS com_pop(Processor *cpu, COMMAND_ASSEMBL *pop_com)
     */
 }
 
+
 static CODE_ERRORS com_jump(Processor *cpu, COMMAND_ASSEMBL *jump_com)
 {
-
+}
+/*
     int *ptr_com = (((int *)cpu->ptr_on_com->arr));
     int command = ptr_com[cpu->numb_com_processing];
     int numb_va = ptr_com[cpu->numb_com_processing + 1];
@@ -269,7 +271,7 @@ static CODE_ERRORS com_jump(Processor *cpu, COMMAND_ASSEMBL *jump_com)
     cpu->numb_com_processing = (numb_va - 1);
 
     return ALL_GOOD;
-}
+}*/
 
 static CODE_ERRORS com_out(Processor *cpu)
 {
